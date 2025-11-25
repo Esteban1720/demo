@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Method {
+  card
+  bio
+  manual
+}
+
+model Visitor {
+  id        Int        @id @default(autoincrement())
+  name      String
+  idCard    String?    @map("id_card")
+  bioUid    String?    @map("bio_uid")
+  createdAt DateTime   @default(now()) @map("created_at")
+  accessLog AccessLog[]
+}
+
+model AccessLog {
+  id        Int      @id @default(autoincrement())
+  visitorId Int?     @map("visitor_id")
+  method    Method
+  methodUid String?  @map("method_uid")
+  allowed   Boolean  @default(false)
+  imagePath String?  @map("image_path")
+  createdAt DateTime @default(now()) @map("created_at")
+  visitor   Visitor? @relation(fields: [visitorId], references: [id])
+}

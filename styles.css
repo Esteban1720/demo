@@ -1,0 +1,94 @@
+:root{
+  --up-green: #006a3d; /* Universidad del Pacífico green */
+  --up-yellow: #ffd100; /* Universidad del Pacífico yellow */
+  --bg: #f4f7f2;
+  --card: #ffffff;
+  --muted: #5b6b63;
+  --accent: var(--up-green);
+  --accent-2: #2da67a;
+  --radius: 14px;
+  --max-width: 1200px;
+}
+
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: linear-gradient(180deg,#ecf7ef 0%, #f4f7f2 100%);
+  color:#102012;
+  -webkit-font-smoothing:antialiased;
+  padding:28px;
+}
+
+.container{
+  max-width:var(--max-width);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:24px;
+  align-items:start;
+}
+
+.header{
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:6px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:56px;height:56px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;color:white;font-weight:800;
+  background:linear-gradient(135deg,var(--up-green), #0aa06b);
+  box-shadow: 0 8px 24px rgba(6,90,48,0.18);
+}
+.title{font-size:1.2rem;font-weight:800}
+.subtitle{color:var(--muted);font-size:0.9rem}
+
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow: 0 6px 20px rgba(16,32,24,0.06);
+  border:1px solid rgba(0,0,0,0.04);
+}
+
+.main{display:flex;flex-direction:column;gap:20px}
+.side{display:flex;flex-direction:column;gap:20px}
+
+/* Forms */
+.visitor-form label{display:block;color:var(--muted);font-size:0.85rem}
+.visitor-form input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(6,30,18,0.06);margin-top:8px}
+.visitor-form .row{display:flex;gap:10px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+.btn.primary{background: linear-gradient(90deg,var(--up-green),#0aa06b);color:white;font-weight:700;box-shadow:0 8px 20px rgba(6,90,48,0.12)}
+.btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--muted)}
+.btn.warn{background: linear-gradient(90deg,var(--up-yellow),#ffd94d);color:#19340a;font-weight:700}
+
+/* Access log */
+.log-list{max-height:300px;overflow:auto;padding:0;margin:0;list-style:none}
+.log-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.log-item .meta{color:var(--muted);font-size:0.9rem}
+.log-item.success{background:linear-gradient(90deg, rgba(6,106,61,0.03), transparent)}
+.log-item.denied{background:linear-gradient(90deg, rgba(255,209,0,0.03), transparent)}
+
+/* Simulation panel */
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sim-card{padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfff9);border:1px solid rgba(0,0,0,0.03)}
+
+/* Responsive */
+@media (max-width:980px){
+  .container{grid-template-columns:1fr;padding:12px}
+  .header{flex-direction:column;align-items:flex-start}
+}
+
+/* Small utilities */
+.muted{color:var(--muted)}
+.center{text-align:center}
+
+/* Footer note */
+.note{font-size:0.85rem;color:var(--muted);margin-top:8px}
