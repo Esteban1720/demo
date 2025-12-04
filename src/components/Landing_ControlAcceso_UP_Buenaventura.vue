@@ -37,8 +37,8 @@
           </p>
 
           <div class="cta">
-            <!-- Botón único para Android -->
-            <button class="btn primary" :disabled="downloading" @click="downloadRelease()">
+            <!-- Botón de descarga manual -->
+            <button class="btn primary" @click="manualDownload">
               <svg viewBox="0 0 24 24" aria-hidden>
                 <path fill="currentColor" d="M4 2v20l15-10z" />
               </svg>
@@ -46,16 +46,9 @@
             </button>
           </div>
 
-          <!-- Progreso / estado de descarga -->
-          <div v-if="downloading" style="margin-top:12px">
-            <small>{{ statusMessage }}</small>
-            <div style="width:100%;max-width:420px;margin-top:8px">
-              <progress :value="progress" max="100" style="width:100%;height:10px"></progress>
-              <div style="font-size:12px;margin-top:4px;color:var(--text-light)">{{ progress }}%</div>
-            </div>
-            <div style="margin-top:8px;font-size:13px;color:var(--text-light)">
-              <em v-if="currentAssetFilename">Archivo: {{ currentAssetFilename }}</em>
-            </div>
+          <!-- Enlace visible como fallback -->
+          <div style="margin-top:10px;">
+            <small style="color:var(--text-light)">Si la descarga no inicia, <a :href="releaseUrl" target="_blank" rel="noopener noreferrer">haz clic aquí</a>.</small>
           </div>
 
           <ul class="bullets">
@@ -110,129 +103,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
 /**
- * CONFIGURACIÓN:
- * - Reemplaza `releaseUrl` por la URL directa del .apk (asset directo, p.ej. GitHub Releases asset link).
- * - `releaseSha256` es opcional pero recomendado: si lo dejas, el cliente verificará el hash.
- *
- * Nota: Para que fetch funcione y puedas verificar el archivo desde el navegador, el servidor que sirve el .apk
- * debe permitir CORS (Access-Control-Allow-Origin).
+ * CONFIG:
+ * - Pon aquí la URL directa al .apk (asset directo, p.ej. GitHub Releases asset link).
+ * - Nota: en recursos cross-origin el atributo `download` puede ser ignorado por el navegador;
+ *   por eso abrimos la URL en nueva pestaña para que el usuario gestione la descarga.
  */
-const releaseUrl = 'https://github.com/Esteban1720/demo/releases/download/DEMOACCESO/app-release.apk' // REEMPLAZA si es necesario
-const releaseSha256 = 'eb89fc5864edc0b1473ff8912ac1adb4604a985584ebe85feb2499bd431d5bc5' // opcional (deja null para omitir verificación)
+const releaseUrl = 'https://github.com/Esteban1720/demo/releases/download/DEMOACCESO/app-release.apk'
 
-const downloading = ref(false)
-const progress = ref(0) // 0..100
-const statusMessage = ref('')
-const currentAssetFilename = ref('up-app-release.apk')
-
-/**
- * Descarga + verificación SHA-256 (si se proporciona)
- */
-async function downloadRelease() {
+function manualDownload() {
   if (!releaseUrl || releaseUrl.includes('example.com')) {
     alert('Reemplaza releaseUrl con la URL directa del archivo .apk antes de usar esta función.')
     return
   }
 
-  try {
-    downloading.value = true
-    progress.value = 0
-    statusMessage.value = 'Iniciando descarga...'
-
-    const resp = await fetch(releaseUrl)
-    if (!resp.ok) throw new Error(`Error descargando: ${resp.status} ${resp.statusText}`)
-
-    const contentLength = resp.headers.get('Content-Length')
-    const total = contentLength ? parseInt(contentLength, 10) : null
-    const reader = resp.body?.getReader()
-    const chunks = []
-    let received = 0
-
-    if (reader) {
-      // Leer por streaming y actualizar progreso
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        chunks.push(value)
-        received += value.length ?? value.byteLength ?? 0
-        if (total) {
-          progress.value = Math.round((received / total) * 100)
-        } else {
-          progress.value = Math.min(95, progress.value + 4)
-        }
-      }
-
-      statusMessage.value = releaseSha256 ? 'Verificando integridad (SHA-256)...' : 'Preparando descarga...'
-      const blob = new Blob(chunks, { type: 'application/vnd.android.package-archive' })
-      const arrayBuffer = await blob.arrayBuffer()
-
-      if (releaseSha256) {
-        // Calcular SHA-256
-        const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
-        const hashArray = Array.from(new Uint8Array(hashBuffer))
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-
-        if (hashHex.toLowerCase() !== releaseSha256.toLowerCase()) {
-          statusMessage.value = 'ERROR: El hash no coincide. Descarga cancelada.'
-          console.error('Hash esperado:', releaseSha256, 'Hash obtenido:', hashHex)
-          alert('El archivo descargado NO coincide con el SHA-256 esperado. No se procederá con la instalación.')
-          downloading.value = false
-          progress.value = 0
-          return
-        }
-      }
-
-      // Si coincide (o no se chequeó), crear enlace para descarga
-      statusMessage.value = 'Descarga lista. Preparando archivo...'
-      const downloadUrl = URL.createObjectURL(blob)
-      triggerDownload(downloadUrl, currentAssetFilename.value)
-      progress.value = 100
-      setTimeout(() => URL.revokeObjectURL(downloadUrl), 60 * 1000)
-
-    } else {
-      // Fallback: leer todo directamente si no hay stream
-      const arrayBuffer = await resp.arrayBuffer()
-
-      if (releaseSha256) {
-        statusMessage.value = 'Verificando integridad (SHA-256)...'
-        const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
-        const hashArray = Array.from(new Uint8Array(hashBuffer))
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-
-        if (hashHex.toLowerCase() !== releaseSha256.toLowerCase()) {
-          statusMessage.value = 'ERROR: El hash no coincide. Descarga cancelada.'
-          alert('El archivo descargado NO coincide con el SHA-256 esperado. No se procederá con la instalación.')
-          downloading.value = false
-          progress.value = 0
-          return
-        }
-      }
-
-      const blob = new Blob([arrayBuffer], { type: 'application/vnd.android.package-archive' })
-      const downloadUrl = URL.createObjectURL(blob)
-      triggerDownload(downloadUrl, currentAssetFilename.value)
-      statusMessage.value = 'Descarga lista.'
-      progress.value = 100
-      setTimeout(() => URL.revokeObjectURL(downloadUrl), 60 * 1000)
-    }
-
-  } catch (err) {
-    console.error(err)
-    alert('Error durante la descarga/verificación: ' + (err?.message || err))
-    statusMessage.value = 'Error: ' + (err?.message || 'desconocido')
-    progress.value = 0
-  } finally {
-    downloading.value = false
-  }
-}
-
-function triggerDownload(url, filename){
+  // Abrir en nueva pestaña; también intentamos sugerir nombre con `download` (puede ser ignorado en cross-origin).
   const a = document.createElement('a')
-  a.href = url
-  a.download = filename
+  a.href = releaseUrl
+  a.target = '_blank'
+  a.rel = 'noopener noreferrer'
+  a.download = 'app-release.apk' // sugerencia, puede ser ignorada si es cross-origin
   document.body.appendChild(a)
   a.click()
   a.remove()
