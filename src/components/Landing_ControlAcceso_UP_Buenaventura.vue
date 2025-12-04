@@ -109,7 +109,7 @@
  * - Nota: en recursos cross-origin el atributo `download` puede ser ignorado por el navegador;
  *   por eso abrimos la URL en nueva pestaña para que el usuario gestione la descarga.
  */
-const releaseUrl = 'https://github.com/Esteban1720/demo/releases/download/DEMOACCESO/app-release.apk'
+const releaseUrl = 'https://github.com/Esteban1720/demo/releases/download/demo/app-release.apk'
 
 function manualDownload() {
   if (!releaseUrl || releaseUrl.includes('example.com')) {
