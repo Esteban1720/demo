@@ -14,7 +14,6 @@ export default {
 </script>
 
 <style>
-/* estilos globales opcionales */
 body {
   margin: 0;
   padding: 0;
