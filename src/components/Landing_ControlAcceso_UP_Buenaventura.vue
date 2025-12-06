@@ -53,10 +53,6 @@
           </div>
 
           <div class="fallback-download">
-            <small>
-              Si la descarga no inicia, 
-              <a :href="releaseUrl" target="_blank" rel="noopener noreferrer">haz clic aquí</a>.
-            </small>
           </div>
 
           <ul class="bullets">
