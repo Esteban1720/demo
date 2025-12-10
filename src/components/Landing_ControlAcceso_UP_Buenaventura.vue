@@ -105,7 +105,7 @@ import { ref, computed } from 'vue'
 import CardBenefit from '@/components/CardBenefit.vue' // 👈 Importa el componente
 
 // URL del .apk (desde .env)
-const releaseUrl = ref(import.meta.env.VITE_RELEASE_URL || 'https://github.com/Esteban1720/demo/releases/download/demo/app-release.apk')
+const releaseUrl = ref(import.meta.env.VITE_RELEASE_URL || 'https://github.com/Esteban1720/demo/releases/download/demo/controlacceso.apk')
 
 // Año dinámico
 const currentYear = computed(() => new Date().getFullYear())
